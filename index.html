@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0; url=https://jkg.ngrok.app">
-    <title>Weiterleitung zum AI-Server</title>
+    <title>Server-Status und Weiterleitung</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,21 +16,41 @@
             border: 1px solid #cc0000;
             padding: 30px;
             margin: 50px auto;
-            max-width: 500px;
+            max-width: 600px;
             background-color: #fff;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .link-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    
-    <h1 style="color: #007bff;">Wird weitergeleitet...</h1>
-    
+
     <div class="offline">
-        <p>Falls Sie nach dieser Meldung eine **Fehlermeldung (z.B. ERR_NGROK_3200)** sehen:</p>
+        <h1>🛑 AI-Server im Ruhemodus!</h1>
+        <p>Momentan ist mein MacBook ausgeschaltet, um Strom zu sparen, oder der Server wurde noch nicht gestartet.</p>
         
-        <h2>🛑 Der Server ist momentan offline.</h2>
-        <p>Mein MacBook ist ausgeschaltet. Schreibe mir bitte eine WhatsApp, damit ich den Server starten kann.</p>
+        <h2>Schreibe mir eine WhatsApp:</h2>
+        <p>Ich starte den Dienst dann umgehend für dich. Danke für dein Verständnis.</p>
+
+        <a href="https://jkg.ngrok.app" class="link-button">
+            Hier klicken, um zu prüfen, ob der Server bereits läuft!
+        </a>
+
+        <p style="margin-top: 30px; font-size: 0.9em; color: #cc0000; font-weight: bold;">
+            WICHTIGER HINWEIS (Ohne WhatsApp-Nachricht):
+        </p>
+        <p style="font-size: 0.9em; color: #666;">
+            Wenn der Server noch **offline** ist, sehen Sie nach dem Klick eine ngrok-Fehlermeldung wie **"500: Internal Error"** oder **"ERR_NGROK_3200"**. Senden Sie mir in diesem Fall bitte die Nachricht.
+        </p>
     </div>
 
 </body>
