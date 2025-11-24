@@ -1,79 +1,61 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Server-Status</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 50px;
-            background-color: #f4f4f9;
-        }
-        .loading {
-            color: #007bff;
-        }
-        .offline {
-            color: #cc0000;
-            border: 1px solid #cc0000;
-            padding: 30px;
-            margin: 50px auto;
-            max-width: 500px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-    </style>
-</head>
-<body>
+<script>
+    const TUNNEL_URL = 'https://jkg.ngrok.app'; 
+    
+    // Meldung 1: Wenn das MACBOOK AUS ist (ERR_NGROK_3200)
+    const OFFLINE_MESSAGE_HTML = `
+        <div class="offline">
+            <h1>🛑 Gesamtsystem offline!</h1>
+            <p>Das MacBook ist momentan ausgeschaltet (ERR_NGROK_3200).</p>
+            <p>Schreibe mir eine WhatsApp – ich schalte den Server dann schnellstmöglich für dich an.</p>
+        </div>
+    `;
 
-    <div id="status-message" class="loading">
-        <h1>🔍 Server-Status wird geprüft...</h1>
-    </div>
+    // Meldung 2: Wenn der WEBSERVER AUS ist (Docker gestoppt)
+    const SERVER_DOWN_MESSAGE_HTML = `
+        <div class="offline">
+            <h1>🚨 Webserver gestoppt!</h1>
+            <p>Der ngrok-Tunnel ist aktiv, aber der **Docker-Webserver (Open WebUI)** ist nicht gestartet (Fehler 502/500).</p>
+            <p>Bitte eine WhatsApp – ich starte den Docker-Container umgehend neu.</p>
+        </div>
+    `;
 
-    <script>
-        // Ihre ngrok-Domain:
-        const TUNNEL_URL = 'https://jkg.ngrok.app'; 
-        
-        // Die Baustellenmeldung, wenn der Server aus ist:
-        const OFFLINE_MESSAGE_HTML = `
-            <div class="offline">
-                <h1>🛑 Server im Ruhemodus!</h1>
-                <p>Schreibe mir eine WhatsApp – ich schalte den Server dann schnellstmöglich für dich an.</p>
-                <p>Danke für deine Geduld!</p>
-            </div>
-        `;
+    async function checkStatusAndRedirect() {
+        try {
+            const response = await fetch(TUNNEL_URL, {
+                method: 'HEAD', 
+                cache: 'no-store'
+            });
 
-        async function checkStatusAndRedirect() {
-            try {
-                // Versucht, die ngrok-URL zu erreichen
-                const response = await fetch(TUNNEL_URL, {
-                    method: 'HEAD', 
-                    cache: 'no-store'
-                });
-
-                // Prüft, ob der Tunnel eine Verbindung herstellen konnte (Statuscodes 200-599)
-                // Wenn die Verbindung erfolgreich ist, leiten wir weiter.
-                if (response.ok || response.status >= 500) { 
-                    window.location.replace(TUNNEL_URL);
-                    return;
-                }
-                
-                displayOfflineMessage();
-
-            } catch (error) {
-                // Wenn fetch wegen eines Netzwerkfehlers (MacBook aus) fehlschlägt
-                displayOfflineMessage();
+            // --- STUFE 2: WEBSERVER-CHECK ---
+            // Prüft, ob ngrok läuft, aber einen internen Fehler (500) oder Bad Gateway (502) meldet.
+            if (response.status === 500 || response.status === 502) {
+                // Tunnel läuft, aber Docker ist gestoppt
+                displayMessage(SERVER_DOWN_MESSAGE_HTML);
+                return;
             }
+            
+            // --- WEITERLEITUNG (ALLES OK) ---
+            // Prüft, ob der Webserver erreichbar ist (200 OK)
+            if (response.ok) { 
+                // Webserver und Tunnel sind aktiv
+                window.location.replace(TUNNEL_URL);
+                return;
+            }
+
+            // Fallback für andere Fehlercodes, bei denen der Tunnel aktiv ist, aber der Webserver nicht
+            displayMessage(SERVER_DOWN_MESSAGE_HTML);
+
+        } catch (error) {
+            // --- STUFE 1: TUNNEL-CHECK ---
+            // Wenn der Fetch-Aufruf fehlschlägt, ist der gesamte Tunnel (MacBook) offline.
+            displayMessage(OFFLINE_MESSAGE_HTML);
         }
+    }
 
-        function displayOfflineMessage() {
-            document.getElementById('status-message').innerHTML = OFFLINE_MESSAGE_HTML;
-        }
+    function displayMessage(htmlContent) {
+        document.getElementById('status-message').innerHTML = htmlContent;
+    }
 
-        // Starte den Check nach 500ms
-        setTimeout(checkStatusAndRedirect, 500);
-    </script>
-
-</body>
-</html>
+    // Startet den Check nach 500ms
+    setTimeout(checkStatusAndRedirect, 500);
+</script>
